@@ -1,6 +1,6 @@
 # Laravel Auto Lang
 
-Automatically append missing Laravel translation strings to `resources/lang/en.json` when using `__()` or `trans()`.
+Automatically scan Laravel project translation strings and append missing values to `resources/lang/en.json`.
 
 ## Installation
 
@@ -10,8 +10,25 @@ composer require nativecode/laravel-auto-lang
 
 ## Usage
 
+Run command:
+
+```bash
+php artisan auto-lang:scan
+```
+
+Example:
+
 ```php
 __('Dashboard');
 
 trans('Profile');
+```
+
+Generated:
+
+```json
+{
+    "Dashboard": "Dashboard",
+    "Profile": "Profile"
+}
 ```
