@@ -17,16 +17,19 @@ class ScanTranslationsCommand extends Command
 
         $langPath = lang_path('en.json');
 
+        // Load existing translations
         if (File::exists($langPath)) {
+
             $translations = json_decode(
                 File::get($langPath),
                 true
             ) ?? [];
         }
 
+        // Scan paths
         $paths = [
             app_path(),
-            resource_path('views')
+            resource_path('views'),
         ];
 
         foreach ($paths as $path) {
@@ -42,21 +45,26 @@ class ScanTranslationsCommand extends Command
                 $content = File::get($file);
 
                 preg_match_all(
-                    '/__\(['"](.+?)['"]\)|trans\(['"](.+?)['"]\)/',
+                    "/__\(['\"](.+?)['\"]\)|trans\(['\"](.+?)['\"]\)/",
                     $content,
                     $matches
                 );
 
                 $results = array_filter(
-                    array_merge($matches[1], $matches[2])
+                    array_merge(
+                        $matches[1] ?? [],
+                        $matches[2] ?? []
+                    )
                 );
 
                 foreach ($results as $text) {
 
+                    // Skip translation file keys
                     if (str_contains($text, '.')) {
                         continue;
                     }
 
+                    // Add missing translation
                     if (! isset($translations[$text])) {
 
                         $translations[$text] = $text;
@@ -67,13 +75,17 @@ class ScanTranslationsCommand extends Command
             }
         }
 
+        // Sort translations
         ksort($translations);
 
+        // Save en.json
         File::put(
             $langPath,
             json_encode(
                 $translations,
-                JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE
+                JSON_PRETTY_PRINT |
+                    JSON_UNESCAPED_UNICODE |
+                    JSON_UNESCAPED_SLASHES
             )
         );
 
