@@ -15,9 +15,3 @@ __('Dashboard');
 
 trans('Profile');
 ```
-
-Missing keys are automatically added to:
-
-```txt
-resources/lang/en.json
-```
