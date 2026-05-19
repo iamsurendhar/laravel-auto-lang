@@ -1,22 +1,22 @@
 {
-    "name": "nativecode/laravel-auto-lang",
-    "description": "Auto append missing Laravel translations to en.json",
-    "type": "library",
-    "license": "MIT",
-    "autoload": {
-        "psr-4": {
-            "NativeCode\\\\AutoLang\\\\": "src/"
-        }
-    },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "NativeCode\\\\AutoLang\\\\AutoLangServiceProvider"
-            ]
-        }
-    },
-    "require": {
-        "php": "^8.1",
-        "illuminate/support": "^10.0|^11.0|^12.0"
+  "name": "nativecode/laravel-auto-lang",
+  "description": "Auto append missing Laravel translations to en.json",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "NativeCode\\AutoLang\\": "src/"
     }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "NativeCode\\\\AutoLang\\\\AutoLangServiceProvider"
+      ]
+    }
+  },
+  "require": {
+    "php": "^8.1",
+    "illuminate/support": "^10.0|^11.0|^12.0"
+  }
 }
