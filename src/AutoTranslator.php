@@ -1,6 +1,6 @@
 <?php
 
-namespace Vendor\AutoTranslate;
+namespace NativeCode\AutoLang;
 
 use Illuminate\Translation\Translator;
 use Illuminate\Filesystem\Filesystem;
@@ -20,7 +20,6 @@ class AutoTranslator extends Translator
     {
         $translation = parent::get($key, $replace, $locale, $fallback);
 
-        // Only track plain JSON strings
         if ($translation === $key) {
             $this->appendToJson($key);
         }
@@ -33,7 +32,10 @@ class AutoTranslator extends Translator
         $path = lang_path('en.json');
 
         if (! $this->files->exists($path)) {
-            $this->files->put($path, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            $this->files->put(
+                $path,
+                json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)
+            );
         }
 
         $content = json_decode($this->files->get($path), true);
