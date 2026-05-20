@@ -26,61 +26,121 @@ class ScanTranslationsCommand extends Command
             ) ?? [];
         }
 
-        // Scan paths
-        $paths = [
-            app_path(),
-            resource_path('views'),
+        // Excluded folders
+        $excludedFolders = [
+            base_path('bootstrap'),
+            base_path('config'),
+            base_path('database'),
+            base_path('routes'),
+            base_path('storage'),
+            base_path('tests'),
+            base_path('vendor'),
         ];
 
-        foreach ($paths as $path) {
+        // Allowed extensions
+        $extensions = [
+            'php',
+            'blade.php',
+            'js',
+            'ts',
+            'jsx',
+            'tsx',
+        ];
 
-            if (! File::exists($path)) {
+        // Scan all project files
+        $files = File::allFiles(base_path());
+
+        foreach ($files as $file) {
+
+            $filePath = $file->getPathname();
+
+            // Skip excluded folders
+            $skip = false;
+
+            foreach ($excludedFolders as $excluded) {
+
+                if (str_starts_with($filePath, $excluded)) {
+                    $skip = true;
+                    break;
+                }
+            }
+
+            if ($skip) {
                 continue;
             }
 
-            $files = File::allFiles($path);
+            // Skip Laravel root files
+            if ($file->getPath() === base_path()) {
 
-            foreach ($files as $file) {
+                $rootExcluded = [
+                    'artisan',
+                ];
 
-                $content = File::get($file);
+                if (in_array($file->getFilename(), $rootExcluded)) {
+                    continue;
+                }
+            }
 
-                $results = [];
+            // Validate extension
+            $filename = $file->getFilename();
 
-                // Blade files => scan __()
-                if (str_ends_with($file->getFilename(), '.blade.php')) {
+            $valid = false;
 
-                    preg_match_all(
-                        "/__\(['\"](.+?)['\"]\)/",
-                        $content,
-                        $matches
-                    );
+            foreach ($extensions as $extension) {
 
-                    $results = $matches[1] ?? [];
-                } else {
+                if (str_ends_with($filename, $extension)) {
+                    $valid = true;
+                    break;
+                }
+            }
 
-                    // PHP/controllers => scan trans()
-                    preg_match_all(
-                        "/trans\(['\"](.+?)['\"]\)/",
-                        $content,
-                        $matches
-                    );
+            if (! $valid) {
+                continue;
+            }
 
-                    $results = $matches[1] ?? [];
+            $content = File::get($file);
+
+            $results = [];
+
+            // Blade files => scan __()
+            if (str_ends_with($filename, '.blade.php')) {
+
+                preg_match_all(
+                    "/__\(['\"](.+?)['\"]\)/",
+                    $content,
+                    $matches
+                );
+
+                $results = $matches[1] ?? [];
+            } else {
+
+                // PHP/JS/TS/TSX => scan trans() and t()
+                preg_match_all(
+                    "/trans\(['\"](.+?)['\"]\)|t\(['\"](.+?)['\"]\)/",
+                    $content,
+                    $matches
+                );
+
+                $results = array_filter(
+                    array_merge(
+                        $matches[1] ?? [],
+                        $matches[2] ?? []
+                    )
+                );
+            }
+
+            foreach ($results as $text) {
+
+                // Skip translation keys
+                if (str_contains($text, '.')) {
+                    continue;
                 }
 
-                foreach ($results as $text) {
+                if (! isset($translations[$text])) {
 
-                    // Skip translation keys
-                    if (str_contains($text, '.')) {
-                        continue;
-                    }
+                    $translations[$text] = $text;
 
-                    if (! isset($translations[$text])) {
-
-                        $translations[$text] = $text;
-
-                        $this->info("Added: {$text}");
-                    }
+                    $this->info("Added: {$text}");
                 }
             }
         }
@@ -88,7 +148,7 @@ class ScanTranslationsCommand extends Command
         // Sort translations
         ksort($translations);
 
-        // Save en.json
+        // Save translations
         File::put(
             $langPath,
             json_encode(
