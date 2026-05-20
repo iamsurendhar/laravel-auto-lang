@@ -44,27 +44,37 @@ class ScanTranslationsCommand extends Command
 
                 $content = File::get($file);
 
-                preg_match_all(
-                    "/__\(['\"](.+?)['\"]\)|trans\(['\"](.+?)['\"]\)/",
-                    $content,
-                    $matches
-                );
+                $results = [];
 
-                $results = array_filter(
-                    array_merge(
-                        $matches[1] ?? [],
-                        $matches[2] ?? []
-                    )
-                );
+                // Blade files => scan __()
+                if (str_ends_with($file->getFilename(), '.blade.php')) {
+
+                    preg_match_all(
+                        "/__\(['\"](.+?)['\"]\)/",
+                        $content,
+                        $matches
+                    );
+
+                    $results = $matches[1] ?? [];
+                } else {
+
+                    // PHP/controllers => scan trans()
+                    preg_match_all(
+                        "/trans\(['\"](.+?)['\"]\)/",
+                        $content,
+                        $matches
+                    );
+
+                    $results = $matches[1] ?? [];
+                }
 
                 foreach ($results as $text) {
 
-                    // Skip translation file keys
+                    // Skip translation keys
                     if (str_contains($text, '.')) {
                         continue;
                     }
 
-                    // Add missing translation
                     if (! isset($translations[$text])) {
 
                         $translations[$text] = $text;
