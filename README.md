@@ -6,9 +6,12 @@ Automatically scan Laravel translation strings and append missing translations t
 
 - Scan `__()` translations in Blade files
 - Scan `trans()` translations in PHP/controllers
+- Scan `t()` translations in JS/TS/React/TSX
 - Automatically generate `lang/en.json`
 - Supports Laravel 10, 11, 12, and 13
 - Simple Artisan command
+- Recursive project scanning
+- Smart folder exclusions
 
 ---
 
@@ -32,7 +35,7 @@ php artisan auto-lang:scan
 
 ## Example
 
-Blade:
+### Blade
 
 ```blade
 {{ __('Dashboard') }}
@@ -40,10 +43,18 @@ Blade:
 {{ __('Profile') }}
 ```
 
-Controller:
+### Controller
 
 ```php
 return trans('Welcome Back');
+```
+
+### React / TSX
+
+```tsx
+t("Login");
+
+t("Register");
 ```
 
 Generated:
@@ -52,19 +63,41 @@ Generated:
 {
   "Dashboard": "Dashboard",
   "Profile": "Profile",
-  "Welcome Back": "Welcome Back"
+  "Welcome Back": "Welcome Back",
+  "Login": "Login",
+  "Register": "Register"
 }
 ```
 
 ---
 
-## Scanned Locations
+## Supported File Types
 
 The package scans:
 
 ```txt
-app/
-resources/views/
+.php
+.blade.php
+.js
+.ts
+.jsx
+.tsx
+```
+
+---
+
+## Excluded Folders
+
+The package ignores:
+
+```txt
+bootstrap/
+config/
+database/
+routes/
+storage/
+tests/
+vendor/
 ```
 
 ---
@@ -92,6 +125,17 @@ composer update nativecode/laravel-auto-lang
 
 ```bash
 php artisan auto-lang:scan
+```
+
+---
+
+## Example Output
+
+```txt
+Added: Dashboard
+Added: Login
+Added: Register
+Translation scan completed.
 ```
 
 ---
