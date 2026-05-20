@@ -64,7 +64,7 @@ class ScanTranslationsCommand extends Command
 
         /*
         |--------------------------------------------------------------------------
-        | Scan All Project Files
+        | Scan Project Files
         |--------------------------------------------------------------------------
         */
 
@@ -113,7 +113,7 @@ class ScanTranslationsCommand extends Command
 
             /*
             |--------------------------------------------------------------------------
-            | Validate File Extension
+            | Validate Extension
             |--------------------------------------------------------------------------
             */
 
@@ -139,7 +139,7 @@ class ScanTranslationsCommand extends Command
 
             /*
             |--------------------------------------------------------------------------
-            | PHP / Blade Files
+            | PHP / Blade Translation Scan
             |--------------------------------------------------------------------------
             |
             | Scan:
@@ -175,21 +175,92 @@ class ScanTranslationsCommand extends Command
 
                 /*
                 |--------------------------------------------------------------------------
-                | JS / TS / JSX / TSX
+                | JS / TS / JSX / TSX Variable Scan
                 |--------------------------------------------------------------------------
                 |
-                | Scan:
-                | t('text')
+                | Detect:
+                | const title = 'Dashboard'
                 |
                 */
 
                 preg_match_all(
-                    "/t\(['\"](.+?)['\"]\)/",
+                    "/const\s+(\w+)\s*=\s*['\"](.+?)['\"]/",
+                    $content,
+                    $variableMatches,
+                    PREG_SET_ORDER
+                );
+
+                $variables = [];
+
+                foreach ($variableMatches as $match) {
+
+                    $variables[$match[1]] = $match[2];
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | JS / TS / JSX / TSX Translation Scan
+                |--------------------------------------------------------------------------
+                |
+                | Scan:
+                | t('text')
+                | t("text")
+                | t(`text`)
+                | t(variable)
+                |
+                */
+
+                preg_match_all(
+                    "/t\(\s*([^)]+)\s*\)/",
                     $content,
                     $matches
                 );
 
-                $results = $matches[1] ?? [];
+                foreach ($matches[1] as $value) {
+
+                    $value = trim($value);
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Direct Strings
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (
+                        preg_match(
+                            "/^['\"](.+?)['\"]$/",
+                            $value,
+                            $stringMatch
+                        )
+                    ) {
+
+                        $results[] = $stringMatch[1];
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Template Literals
+                    |--------------------------------------------------------------------------
+                    */ elseif (
+                        preg_match(
+                            "/^`(.+?)`$/",
+                            $value,
+                            $templateMatch
+                        )
+                    ) {
+
+                        $results[] = $templateMatch[1];
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Local Variables
+                    |--------------------------------------------------------------------------
+                    */ elseif (isset($variables[$value])) {
+
+                        $results[] = $variables[$value];
+                    }
+                }
             }
 
             /*
@@ -199,6 +270,12 @@ class ScanTranslationsCommand extends Command
             */
 
             foreach ($results as $text) {
+
+                $text = trim($text);
+
+                if (empty($text)) {
+                    continue;
+                }
 
                 // Skip translation keys
                 if (str_contains($text, '.')) {
