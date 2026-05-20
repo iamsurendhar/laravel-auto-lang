@@ -16,6 +16,7 @@ class AutoLangServiceProvider extends ServiceProvider
     {
         $this->commands([
             ScanTranslationsCommand::class,
+            TranslateJsonCommand::class,
         ]);
     }
 }
