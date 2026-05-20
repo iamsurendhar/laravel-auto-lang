@@ -11,7 +11,6 @@ Automatically scan Laravel translation strings and append missing translations t
 - Auto generate other language JSON files
 - Multiple translation provider fallback
 - Prevent API rate limits automatically
-- Automatically generate `lang/en.json`
 - Recursive project scanning
 - Smart folder exclusions
 - Supports Laravel 10, 11, 12, and 13
@@ -51,11 +50,11 @@ return trans('Welcome Back');
 ## React / TSX Example
 
 ```tsx
-t("Login");
+t('Login')
 
-t("Register");
+t("Register")
 
-t(`Dashboard`);
+t(`Dashboard`)
 ```
 
 ---
@@ -63,21 +62,21 @@ t(`Dashboard`);
 ## Local Variable Example
 
 ```tsx
-const title = "Settings";
+const title = 'Settings';
 
-t(title);
+t(title)
 ```
 
 Generated:
 
 ```json
 {
-  "Dashboard": "Dashboard",
-  "Plugins": "Plugins",
-  "Welcome Back": "Welcome Back",
-  "Login": "Login",
-  "Register": "Register",
-  "Settings": "Settings"
+    "Dashboard": "Dashboard",
+    "Plugins": "Plugins",
+    "Welcome Back": "Welcome Back",
+    "Login": "Login",
+    "Register": "Register",
+    "Settings": "Settings"
 }
 ```
 
@@ -111,7 +110,7 @@ resources/lang/ro.json
 
 ## Translation Providers
 
-The package automatically falls back between:
+Automatic fallback providers:
 
 ```txt
 Google Translate
@@ -163,11 +162,11 @@ vendor/
 ## Supported Laravel Versions
 
 | Laravel Version | Supported |
-| --------------- | --------- |
-| 10.x            | Yes       |
-| 11.x            | Yes       |
-| 12.x            | Yes       |
-| 13.x            | Yes       |
+|------------------|------------|
+| 10.x | Yes |
+| 11.x | Yes |
+| 12.x | Yes |
+| 13.x | Yes |
 
 ---
 
@@ -190,7 +189,7 @@ php artisan auto-lang:scan
 ## Translate Language Files
 
 ```bash
-php artisan auto-lang:translate ta
+php artisan auto-lang:translate ta ar ro
 ```
 
 ---
