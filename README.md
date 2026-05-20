@@ -1,13 +1,13 @@
 # Laravel Auto Lang
 
-Automatically scan Laravel project translation strings and append missing translations to `resources/lang/en.json`.
+Automatically scan Laravel translation strings and append missing translations to `resources/lang/en.json`.
 
 ## Features
 
-- Scan `__()` translations
-- Scan `trans()` translations
+- Scan `__()` translations in Blade files
+- Scan `trans()` translations in PHP/controllers
 - Automatically generate `lang/en.json`
-- Supports Laravel 10, 11, and 12
+- Supports Laravel 10, 11, 12, and 13
 - Simple Artisan command
 
 ---
@@ -37,13 +37,13 @@ Blade:
 ```blade
 {{ __('Dashboard') }}
 
-{{ trans('Profile') }}
+{{ __('Profile') }}
 ```
 
 Controller:
 
 ```php
-return __('Welcome Back');
+return trans('Welcome Back');
 ```
 
 Generated:
@@ -76,6 +76,7 @@ resources/views/
 | 10.x            | Yes       |
 | 11.x            | Yes       |
 | 12.x            | Yes       |
+| 13.x            | Yes       |
 
 ---
 
@@ -83,6 +84,14 @@ resources/views/
 
 ```bash
 composer update nativecode/laravel-auto-lang
+```
+
+---
+
+## Run Scan Again
+
+```bash
+php artisan auto-lang:scan
 ```
 
 ---
