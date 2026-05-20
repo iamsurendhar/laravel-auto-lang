@@ -17,7 +17,12 @@ class ScanTranslationsCommand extends Command
 
         $langPath = lang_path('en.json');
 
-        // Load existing translations
+        /*
+        |--------------------------------------------------------------------------
+        | Load Existing Translations
+        |--------------------------------------------------------------------------
+        */
+
         if (File::exists($langPath)) {
 
             $translations = json_decode(
@@ -26,7 +31,12 @@ class ScanTranslationsCommand extends Command
             ) ?? [];
         }
 
-        // Excluded folders
+        /*
+        |--------------------------------------------------------------------------
+        | Excluded Folders
+        |--------------------------------------------------------------------------
+        */
+
         $excludedFolders = [
             base_path('bootstrap'),
             base_path('config'),
@@ -37,24 +47,39 @@ class ScanTranslationsCommand extends Command
             base_path('vendor'),
         ];
 
-        // Allowed extensions
+        /*
+        |--------------------------------------------------------------------------
+        | Allowed File Extensions
+        |--------------------------------------------------------------------------
+        */
+
         $extensions = [
-            'php',
-            'blade.php',
-            'js',
-            'ts',
-            'jsx',
-            'tsx',
+            '.php',
+            '.blade.php',
+            '.js',
+            '.ts',
+            '.jsx',
+            '.tsx',
         ];
 
-        // Scan all project files
+        /*
+        |--------------------------------------------------------------------------
+        | Scan All Project Files
+        |--------------------------------------------------------------------------
+        */
+
         $files = File::allFiles(base_path());
 
         foreach ($files as $file) {
 
             $filePath = $file->getPathname();
 
-            // Skip excluded folders
+            /*
+            |--------------------------------------------------------------------------
+            | Skip Excluded Folders
+            |--------------------------------------------------------------------------
+            */
+
             $skip = false;
 
             foreach ($excludedFolders as $excluded) {
@@ -69,7 +94,12 @@ class ScanTranslationsCommand extends Command
                 continue;
             }
 
-            // Skip Laravel root files
+            /*
+            |--------------------------------------------------------------------------
+            | Skip Laravel Root Files
+            |--------------------------------------------------------------------------
+            */
+
             if ($file->getPath() === base_path()) {
 
                 $rootExcluded = [
@@ -81,7 +111,12 @@ class ScanTranslationsCommand extends Command
                 }
             }
 
-            // Validate extension
+            /*
+            |--------------------------------------------------------------------------
+            | Validate File Extension
+            |--------------------------------------------------------------------------
+            */
+
             $filename = $file->getFilename();
 
             $valid = false;
@@ -102,32 +137,66 @@ class ScanTranslationsCommand extends Command
 
             $results = [];
 
-            // Blade files => scan __()
-            if (str_ends_with($filename, '.blade.php')) {
+            /*
+            |--------------------------------------------------------------------------
+            | PHP / Blade Files
+            |--------------------------------------------------------------------------
+            |
+            | Scan:
+            | __('text')
+            | trans('text')
+            |
+            */
+
+            if (
+                str_ends_with($filename, '.blade.php') ||
+                str_ends_with($filename, '.php')
+            ) {
 
                 preg_match_all(
                     "/__\(['\"](.+?)['\"]\)/",
+                    $content,
+                    $matches1
+                );
+
+                preg_match_all(
+                    "/trans\(['\"](.+?)['\"]\)/",
+                    $content,
+                    $matches2
+                );
+
+                $results = array_filter(
+                    array_merge(
+                        $matches1[1] ?? [],
+                        $matches2[1] ?? []
+                    )
+                );
+            } else {
+
+                /*
+                |--------------------------------------------------------------------------
+                | JS / TS / JSX / TSX
+                |--------------------------------------------------------------------------
+                |
+                | Scan:
+                | t('text')
+                |
+                */
+
+                preg_match_all(
+                    "/t\(['\"](.+?)['\"]\)/",
                     $content,
                     $matches
                 );
 
                 $results = $matches[1] ?? [];
-            } else {
-
-                // PHP/JS/TS/TSX => scan trans() and t()
-                preg_match_all(
-                    "/trans\(['\"](.+?)['\"]\)|t\(['\"](.+?)['\"]\)/",
-                    $content,
-                    $matches
-                );
-
-                $results = array_filter(
-                    array_merge(
-                        $matches[1] ?? [],
-                        $matches[2] ?? []
-                    )
-                );
             }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Save Missing Translations
+            |--------------------------------------------------------------------------
+            */
 
             foreach ($results as $text) {
 
@@ -145,10 +214,20 @@ class ScanTranslationsCommand extends Command
             }
         }
 
-        // Sort translations
+        /*
+        |--------------------------------------------------------------------------
+        | Sort Translations
+        |--------------------------------------------------------------------------
+        */
+
         ksort($translations);
 
-        // Save translations
+        /*
+        |--------------------------------------------------------------------------
+        | Save en.json
+        |--------------------------------------------------------------------------
+        */
+
         File::put(
             $langPath,
             json_encode(

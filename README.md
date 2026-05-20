@@ -4,14 +4,13 @@ Automatically scan Laravel translation strings and append missing translations t
 
 ## Features
 
-- Scan `__()` translations in Blade files
+- Scan `__()` translations in PHP and Blade files
 - Scan `trans()` translations in PHP/controllers
-- Scan `t()` translations in JS/TS/React/TSX
+- Scan `t()` translations in JS/TS/JSX/TSX
 - Automatically generate `lang/en.json`
-- Supports Laravel 10, 11, 12, and 13
-- Simple Artisan command
 - Recursive project scanning
 - Smart folder exclusions
+- Supports Laravel 10, 11, 12, and 13
 
 ---
 
@@ -35,17 +34,13 @@ php artisan auto-lang:scan
 
 ## Example
 
-### Blade
-
-```blade
-{{ __('Dashboard') }}
-
-{{ __('Profile') }}
-```
-
-### Controller
+### PHP / Blade
 
 ```php
+{{ __('Dashboard') }}
+
+{{ __('Plugins') }}
+
 return trans('Welcome Back');
 ```
 
@@ -62,7 +57,7 @@ Generated:
 ```json
 {
   "Dashboard": "Dashboard",
-  "Profile": "Profile",
+  "Plugins": "Plugins",
   "Welcome Back": "Welcome Back",
   "Login": "Login",
   "Register": "Register"
@@ -72,8 +67,6 @@ Generated:
 ---
 
 ## Supported File Types
-
-The package scans:
 
 ```txt
 .php
@@ -87,8 +80,6 @@ The package scans:
 ---
 
 ## Excluded Folders
-
-The package ignores:
 
 ```txt
 bootstrap/
@@ -133,8 +124,9 @@ php artisan auto-lang:scan
 
 ```txt
 Added: Dashboard
+Added: Plugins
+Added: Welcome Back
 Added: Login
-Added: Register
 Translation scan completed.
 ```
 
