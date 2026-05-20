@@ -9,6 +9,8 @@ Automatically scan Laravel translation strings and append missing translations t
 - Scan `t()` translations in JS/TS/JSX/TSX
 - Supports local variable translation detection
 - Auto generate other language JSON files
+- Multiple translation provider fallback
+- Prevent API rate limits automatically
 - Automatically generate `lang/en.json`
 - Recursive project scanning
 - Smart folder exclusions
@@ -89,32 +91,45 @@ Generate another language JSON automatically:
 php artisan auto-lang:translate ta
 ```
 
-Example:
+---
+
+## Bulk Translate
+
+```bash
+php artisan auto-lang:translate ta ar ro
+```
+
+Generated:
 
 ```txt
 resources/lang/ta.json
+resources/lang/ar.json
+resources/lang/ro.json
 ```
 
 ---
 
-## Supported Translate Languages
+## Translation Providers
 
-Examples:
+The package automatically falls back between:
 
-```bash
-php artisan auto-lang:translate ta
-php artisan auto-lang:translate hi
-php artisan auto-lang:translate ar
-php artisan auto-lang:translate fr
+```txt
+Google Translate
+LibreTranslate
+Lingva Translate
 ```
 
 ---
 
-## Free Translation API
+## Rate Limit Protection
 
-Uses free Google Translate endpoint.
+Automatic delay protection included:
 
-No API key required.
+```txt
+usleep(300000)
+```
+
+to reduce API blocking risks.
 
 ---
 
@@ -168,6 +183,14 @@ composer update nativecode/laravel-auto-lang
 
 ```bash
 php artisan auto-lang:scan
+```
+
+---
+
+## Translate Language Files
+
+```bash
+php artisan auto-lang:translate ta
 ```
 
 ---
